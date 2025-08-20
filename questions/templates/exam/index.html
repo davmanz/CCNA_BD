@@ -1,0 +1,66 @@
+<!-- templates/exam/index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Examen CCNA</title>
+</head>
+<body>
+    <h1>Examen CCNA</h1>
+    <form method="post">
+        {% csrf_token %}
+        {% for question in questions %}
+            <fieldset>
+                <legend>{{ question.text }}</legend>
+                
+                {% if question.question_type == "SINGLE" %}
+                    <label>
+                        <input type="radio" name="question_{{ question.id }}" value="A">
+                        {{ question.option_a }}
+                    </label><br>
+                    <label>
+                        <input type="radio" name="question_{{ question.id }}" value="B">
+                        {{ question.option_b }}
+                    </label><br>
+                    <label>
+                        <input type="radio" name="question_{{ question.id }}" value="C">
+                        {{ question.option_c }}
+                    </label><br>
+                    <label>
+                        <input type="radio" name="question_{{ question.id }}" value="D">
+                        {{ question.option_d }}
+                    </label><br>
+                    <label>
+                        <input type="radio" name="question_{{ question.id }}" value="E">
+                        {{ question.option_e }}
+                    </label><br>
+                {% elif question.question_type == "MULTI" %}
+                    <label>
+                        <input type="checkbox" name="question_{{ question.id }}" value="A">
+                        {{ question.option_a }}
+                    </label><br>
+                    <label>
+                        <input type="checkbox" name="question_{{ question.id }}" value="B">
+                        {{ question.option_b }}
+                    </label><br>
+                    <label>
+                        <input type="checkbox" name="question_{{ question.id }}" value="C">
+                        {{ question.option_c }}
+                    </label><br>
+                    <label>
+                        <input type="checkbox" name="question_{{ question.id }}" value="D">
+                        {{ question.option_d }}
+                    </label><br>
+                    <label>
+                        <input type="checkbox" name="question_{{ question.id }}" value="E">
+                        {{ question.option_e }}
+                    </label><br>
+                {% elif question.question_type == "DRAG" %}
+                    <!-- Aquí iría el código para las preguntas Drag and Drop -->
+                {% endif %}
+            </fieldset>
+        {% endfor %}
+        <button type="submit">Enviar respuestas</button>
+    </form>
+</body>
+</html>

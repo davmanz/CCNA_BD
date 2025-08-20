@@ -1,0 +1,15 @@
+<!-- templates/exam/results.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultados del Examen</title>
+</head>
+<body>
+    <h1>Resultados del Examen CCNA</h1>
+    <p>Has respondido {{ correct_answers }} de {{ total_questions }} preguntas correctamente.</p>
+    <p>Tu puntaje es: {{ score }}%</p>
+
+    <a href="{% url 'examen' %}">Volver a intentarlo</a>
+</body>
+</html>
