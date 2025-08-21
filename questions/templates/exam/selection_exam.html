@@ -12,114 +12,163 @@
         <a href="{% url 'examen' %}" class="back-btn">← Volver al Menú Principal</a>
         
         <div class="header">
-            <h1>📝 Preguntas de Selección</h1>
-            <p class="exam-info">Preguntas de selección única y múltiple</p>
+            <h1>🖥️ Preguntas de Selección</h1>
+            <p class="exam-info">Responde y avanza una por una - Navegación inteligente</p>
         </div>
-        
+
         {% if questions %}
+            <!-- Progreso Mejorado -->
+            <div class="progress-wrapper">
+                <div class="progress-top">
+                    <div id="counter" class="stat-card">
+                        <div class="stat-number">1</div>
+                        <div class="stat-label">Pregunta Actual</div>
+                    </div>
+                    <div id="answered" class="stat-card">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Respondidas</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="pageProgress" style="width:0%"></div>
+                </div>
+            </div>
+
             <form method="post" id="examForm">
                 {% csrf_token %}
                 {% for question in questions %}
-                    <div class="question">
-                        <legend>
-                            {{ question.text|linebreaksbr }}
-                            <span class="question-type">
-                                {% if question.question_type == "SINGLE" %}
-                                    Selección Única
-                                {% elif question.question_type == "MULTI" %}
-                                    Selección Múltiple
-                                {% endif %}
-                            </span>
-                        </legend>
+                    <fieldset class="question{% if not forloop.first %} hidden{% endif %}{% if forloop.first %} active{% endif %}" data-index="{{ forloop.counter0 }}">
                         
-                        <!-- Mostrar imagen si existe -->
+                        {% comment %} PRIMERO: La imagen si existe {% endcomment %}
                         {% if question.has_image and question.image_path %}
                             <div class="question-image">
-                                <img src="/media/{{ question.image_path }}" 
-                                     alt="Imagen de la pregunta" 
-                                     onerror="this.style.display='none'">
+                                <img src="/media/{{ question.image_path }}" alt="Imagen de la pregunta {{ forloop.counter }}" style="display: none;">
                             </div>
                         {% endif %}
-                        
+
+                        {% comment %} SEGUNDO: El texto de la pregunta {% endcomment %}
+                        <legend class="question-text" id="question-text">
+                            {{ question.text|linebreaksbr }}
+                        </legend>
+
+                        {% comment %} TERCERO: Las opciones con letras alineadas {% endcomment %}
                         {% if question.question_type == "SINGLE" %}
                             <div class="option">
                                 <label>
                                     <input type="radio" name="question_{{ question.id }}" value="A">
-                                    <div class="option-text">A) {{ question.option_a|linebreaksbr }}</div>
+                                    <div class="option-text">
+                                        <span class="option-letter">A)</span>
+                                        <span class="option-content">{{ question.option_a|linebreaksbr }}</span>
+                                    </div>
                                 </label>
                             </div>
                             <div class="option">
                                 <label>
                                     <input type="radio" name="question_{{ question.id }}" value="B">
-                                    <div class="option-text">B) {{ question.option_b|linebreaksbr }}</div>
+                                    <div class="option-text">
+                                        <span class="option-letter">B)</span>
+                                        <span class="option-content">{{ question.option_b|linebreaksbr }}</span>
+                                    </div>
                                 </label>
                             </div>
                             <div class="option">
                                 <label>
                                     <input type="radio" name="question_{{ question.id }}" value="C">
-                                    <div class="option-text">C) {{ question.option_c|linebreaksbr }}</div>
+                                    <div class="option-text">
+                                        <span class="option-letter">C)</span>
+                                        <span class="option-content">{{ question.option_c|linebreaksbr }}</span>
+                                    </div>
                                 </label>
                             </div>
                             <div class="option">
                                 <label>
                                     <input type="radio" name="question_{{ question.id }}" value="D">
-                                    <div class="option-text">D) {{ question.option_d|linebreaksbr }}</div>
+                                    <div class="option-text">
+                                        <span class="option-letter">D)</span>
+                                        <span class="option-content">{{ question.option_d|linebreaksbr }}</span>
+                                    </div>
                                 </label>
                             </div>
                             {% if question.option_e %}
                             <div class="option">
                                 <label>
                                     <input type="radio" name="question_{{ question.id }}" value="E">
-                                    <div class="option-text">E) {{ question.option_e|linebreaksbr }}</div>
+                                    <div class="option-text">
+                                        <span class="option-letter">E)</span>
+                                        <span class="option-content">{{ question.option_e|linebreaksbr }}</span>
+                                    </div>
                                 </label>
                             </div>
                             {% endif %}
-                            
+                        
                         {% elif question.question_type == "MULTI" %}
                             <div class="option">
                                 <label>
                                     <input type="checkbox" name="question_{{ question.id }}" value="A">
-                                    <div class="option-text">A) {{ question.option_a|linebreaksbr }}</div>
+                                    <div class="option-text">
+                                        <span class="option-letter">A)</span>
+                                        <span class="option-content">{{ question.option_a|linebreaksbr }}</span>
+                                    </div>
                                 </label>
                             </div>
                             <div class="option">
                                 <label>
                                     <input type="checkbox" name="question_{{ question.id }}" value="B">
-                                    <div class="option-text">B) {{ question.option_b|linebreaksbr }}</div>
+                                    <div class="option-text">
+                                        <span class="option-letter">B)</span>
+                                        <span class="option-content">{{ question.option_b|linebreaksbr }}</span>
+                                    </div>
                                 </label>
                             </div>
                             <div class="option">
                                 <label>
                                     <input type="checkbox" name="question_{{ question.id }}" value="C">
-                                    <div class="option-text">C) {{ question.option_c|linebreaksbr }}</div>
+                                    <div class="option-text">
+                                        <span class="option-letter">C)</span>
+                                        <span class="option-content">{{ question.option_c|linebreaksbr }}</span>
+                                    </div>
                                 </label>
                             </div>
                             <div class="option">
                                 <label>
                                     <input type="checkbox" name="question_{{ question.id }}" value="D">
-                                    <div class="option-text">D) {{ question.option_d|linebreaksbr }}</div>
+                                    <div class="option-text">
+                                        <span class="option-letter">D)</span>
+                                        <span class="option-content">{{ question.option_d|linebreaksbr }}</span>
+                                    </div>
                                 </label>
                             </div>
                             {% if question.option_e %}
                             <div class="option">
                                 <label>
                                     <input type="checkbox" name="question_{{ question.id }}" value="E">
-                                    <div class="option-text">E) {{ question.option_e|linebreaksbr }}</div>
+                                    <div class="option-text">
+                                        <span class="option-letter">E)</span>
+                                        <span class="option-content">{{ question.option_e|linebreaksbr }}</span>
+                                    </div>
                                 </label>
                             </div>
                             {% endif %}
                         {% endif %}
-                    </div>
+                    </fieldset>
                 {% endfor %}
-                <button type="submit" class="submit-btn">Enviar Respuestas</button>
+
+                <!-- Navegación -->
+                <div class="wizard-nav">
+                    <button type="button" id="prevBtn" class="nav-btn" disabled>← Anterior</button>
+                    <button type="button" id="nextBtn" class="nav-btn primary">Siguiente →</button>
+                    <button type="submit" id="finishBtn" class="submit-btn hidden">Finalizar Examen</button>
+                </div>
             </form>
         {% else %}
             <div class="no-questions">
                 <h3>📚 No hay preguntas disponibles</h3>
                 <p>Aún no se han cargado preguntas de selección en el sistema.</p>
-                <p><a href="{% url 'upload_csv' %}" style="color: #007bff;">Cargar preguntas desde CSV</a></p>
+                <p><a href="{% url 'upload_csv' %}" style="color: #667eea;">Cargar preguntas desde CSV</a></p>
             </div>
         {% endif %}
     </div>
+
+    <script src="{% static 'questions/js/selection_exam.js' %}"></script>
 </body>
 </html>
