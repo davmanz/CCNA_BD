@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen CCNA - Preguntas Drag & Drop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .exam-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #6f42c1;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .exam-info {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .back-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            transition: background-color 0.2s;
+        }
+        
+        .back-btn:hover {
+            background-color: #545b62;
+        }
+        
+        .coming-soon {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .coming-soon h3 {
+            color: #6f42c1;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        
+        .coming-soon p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        
+        .feature-list {
+            text-align: left;
+            max-width: 500px;
+            margin: 30px auto;
+            background-color: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid #6f42c1;
+        }
+        
+        .feature-list h4 {
+            color: #6f42c1;
+            margin-bottom: 15px;
+        }
+        
+        .feature-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-list li:before {
+            content: "✨";
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="exam-container">
+        <a href="{% url 'examen' %}" class="back-btn">← Volver al Menú Principal</a>
+        
+        <div class="header">
+            <h1>🎯 Preguntas Drag & Drop</h1>
+            <p class="exam-info">Preguntas de arrastrar y soltar</p>
+        </div>
+        
+        <div class="coming-soon">
+            <div class="icon">🚧</div>
+            <h3>Próximamente</h3>
+            <p>Esta sección está en desarrollo y estará disponible muy pronto.</p>
+            <p>Las preguntas de drag & drop tendrán una nueva estructura mejorada para una mejor experiencia de usuario.</p>
+            
+            <div class="feature-list">
+                <h4>🎯 Características que vendrán:</h4>
+                <ul>
+                    <li>Interfaz intuitiva de arrastrar y soltar</li>
+                    <li>Múltiples categorías de destino</li>
+                    <li>Validación en tiempo real</li>
+                    <li>Retroalimentación visual mejorada</li>
+                    <li>Soporte para imágenes en preguntas</li>
+                </ul>
+            </div>
+            
+            <p style="margin-top: 30px;">
+                Mientras tanto, puedes practicar con las 
+                <a href="{% url 'selection_exam' %}" style="color: #6f42c1; text-decoration: none; font-weight: bold;">preguntas de selección</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

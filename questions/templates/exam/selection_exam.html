@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen CCNA - Preguntas de Selección</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .exam-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .exam-info {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .question {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        
+        .question legend {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+        
+        .question-image {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .question-image img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .option {
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .option:hover {
+            background-color: #e8f4fd;
+        }
+        
+        .option label {
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .option input {
+            margin-right: 10px;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+        
+        .option-text {
+            flex: 1;
+        }
+        
+        .submit-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto 0;
+            transition: background-color 0.2s;
+        }
+        
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .question-type {
+            background-color: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+        
+        .back-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            transition: background-color 0.2s;
+        }
+        
+        .back-btn:hover {
+            background-color: #545b62;
+        }
+        
+        .no-questions {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .no-questions h3 {
+            color: #999;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="exam-container">
+        <a href="{% url 'examen' %}" class="back-btn">← Volver al Menú Principal</a>
+        
+        <div class="header">
+            <h1>📝 Preguntas de Selección</h1>
+            <p class="exam-info">Preguntas de selección única y múltiple</p>
+        </div>
+        
+        {% if questions %}
+            <form method="post" id="examForm">
+                {% csrf_token %}
+                {% for question in questions %}
+                    <div class="question">
+                        <legend>
+                            {{ question.text|linebreaksbr }}
+                            <span class="question-type">
+                                {% if question.question_type == "SINGLE" %}
+                                    Selección Única
+                                {% elif question.question_type == "MULTI" %}
+                                    Selección Múltiple
+                                {% endif %}
+                            </span>
+                        </legend>
+                        
+                        <!-- Mostrar imagen si existe -->
+                        {% if question.has_image and question.image_path %}
+                            <div class="question-image">
+                                <img src="/media/{{ question.image_path }}" 
+                                     alt="Imagen de la pregunta" 
+                                     onerror="this.style.display='none'">
+                            </div>
+                        {% endif %}
+                        
+                        {% if question.question_type == "SINGLE" %}
+                            <div class="option">
+                                <label>
+                                    <input type="radio" name="question_{{ question.id }}" value="A">
+                                    <div class="option-text">A) {{ question.option_a|linebreaksbr }}</div>
+                                </label>
+                            </div>
+                            <div class="option">
+                                <label>
+                                    <input type="radio" name="question_{{ question.id }}" value="B">
+                                    <div class="option-text">B) {{ question.option_b|linebreaksbr }}</div>
+                                </label>
+                            </div>
+                            <div class="option">
+                                <label>
+                                    <input type="radio" name="question_{{ question.id }}" value="C">
+                                    <div class="option-text">C) {{ question.option_c|linebreaksbr }}</div>
+                                </label>
+                            </div>
+                            <div class="option">
+                                <label>
+                                    <input type="radio" name="question_{{ question.id }}" value="D">
+                                    <div class="option-text">D) {{ question.option_d|linebreaksbr }}</div>
+                                </label>
+                            </div>
+                            {% if question.option_e %}
+                            <div class="option">
+                                <label>
+                                    <input type="radio" name="question_{{ question.id }}" value="E">
+                                    <div class="option-text">E) {{ question.option_e|linebreaksbr }}</div>
+                                </label>
+                            </div>
+                            {% endif %}
+                            
+                        {% elif question.question_type == "MULTI" %}
+                            <div class="option">
+                                <label>
+                                    <input type="checkbox" name="question_{{ question.id }}" value="A">
+                                    <div class="option-text">A) {{ question.option_a|linebreaksbr }}</div>
+                                </label>
+                            </div>
+                            <div class="option">
+                                <label>
+                                    <input type="checkbox" name="question_{{ question.id }}" value="B">
+                                    <div class="option-text">B) {{ question.option_b|linebreaksbr }}</div>
+                                </label>
+                            </div>
+                            <div class="option">
+                                <label>
+                                    <input type="checkbox" name="question_{{ question.id }}" value="C">
+                                    <div class="option-text">C) {{ question.option_c|linebreaksbr }}</div>
+                                </label>
+                            </div>
+                            <div class="option">
+                                <label>
+                                    <input type="checkbox" name="question_{{ question.id }}" value="D">
+                                    <div class="option-text">D) {{ question.option_d|linebreaksbr }}</div>
+                                </label>
+                            </div>
+                            {% if question.option_e %}
+                            <div class="option">
+                                <label>
+                                    <input type="checkbox" name="question_{{ question.id }}" value="E">
+                                    <div class="option-text">E) {{ question.option_e|linebreaksbr }}</div>
+                                </label>
+                            </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="submit-btn">Enviar Respuestas</button>
+            </form>
+        {% else %}
+            <div class="no-questions">
+                <h3>📚 No hay preguntas disponibles</h3>
+                <p>Aún no se han cargado preguntas de selección en el sistema.</p>
+                <p><a href="{% url 'upload_csv' %}" style="color: #007bff;">Cargar preguntas desde CSV</a></p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

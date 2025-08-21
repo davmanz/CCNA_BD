@@ -207,10 +207,30 @@
         .clear-btn:hover {
             background-color: #c82333;
         }
+        
+        .back-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            transition: background-color 0.2s;
+        }
+        
+        .back-btn:hover {
+            background-color: #545b62;
+        }
     </style>
 </head>
 <body>
     <div class="upload-container">
+        <a href="{% url 'examen' %}" class="back-btn">← Volver al Menú Principal</a>
+        
         <h1>📂 Cargar Preguntas desde CSV</h1>
         
         {% if validation_errors %}
@@ -237,7 +257,7 @@
                 {{ success_message }}
                 <br><br>
                 <a href="/admin/" style="color: #155724; text-decoration: underline;">Ver en Admin</a> |
-                <a href="{% url 'examen' %}" style="color: #155724; text-decoration: underline;">Ir al Examen</a>
+                <a href="{% url 'examen' %}" style="color: #155724; text-decoration: underline;">Ir al Menú Principal</a>
             </div>
         {% endif %}
         
@@ -248,37 +268,37 @@
         {% endif %}
 
         {% if pending_confirmation %}
-  <div class="alert alert-info"><strong>Se detectaron cambios.</strong> Revisa y confirma para aplicar.</div>
+            <div class="alert alert-info"><strong>Se detectaron cambios.</strong> Revisa y confirma para aplicar.</div>
 
-  <div class="validation-errors" style="background:#fff;border-color:#ddd;">
-    <h3>Propuestas de cambio</h3>
-    <ul>
-      {% for c in proposed_changes %}
-        <li>
-          <strong>{{ c.np }}</strong> ({{ c.question_type }}) – 
-          {% if c.action == 'CREATE' %} 🆕 Crear
-          {% elif c.action == 'UPDATE' %} ✏️ Actualizar
-          {% endif %}
-          {% if c.action == 'UPDATE' %}
-            <ul>
-              {% for field, values in c.diff.items %}
-                <li><code>{{ field }}</code>: "<em>{{ values.old }}</em>" → "<strong>{{ values.new }}</strong>"</li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ul>
-  </div>
+            <div class="validation-errors" style="background:#fff;border-color:#ddd;">
+                <h3>Propuestas de cambio</h3>
+                <ul>
+                    {% for c in proposed_changes %}
+                        <li>
+                            <strong>{{ c.np }}</strong> ({{ c.question_type }}) — 
+                            {% if c.action == 'CREATE' %} 🆕 Crear
+                            {% elif c.action == 'UPDATE' %} ✏️ Actualizar
+                            {% endif %}
+                            {% if c.action == 'UPDATE' %}
+                                <ul>
+                                    {% for field, values in c.diff.items %}
+                                        <li><code>{{ field }}</code>: "<em>{{ values.old }}</em>" → "<strong>{{ values.new }}</strong>"</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
 
-  <form method="POST">
-    {% csrf_token %}
-    <input type="hidden" name="confirm" value="1">
-    <input type="hidden" name="proposed_changes" value='{{ proposed_changes_json|escape }}'>
-    <button type="submit" class="submit-btn">✅ Confirmar y aplicar cambios</button>
-    <a href="{% url 'upload_csv' %}" class="clear-btn" style="margin-left:10px;">Cancelar</a>
-  </form>
-{% endif %}
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="confirm" value="1">
+                <input type="hidden" name="proposed_changes" value='{{ proposed_changes_json|escape }}'>
+                <button type="submit" class="submit-btn">✅ Confirmar y aplicar cambios</button>
+                <a href="{% url 'upload_csv' %}" class="clear-btn" style="margin-left:10px;">Cancelar</a>
+            </form>
+        {% endif %}
 
         
         <div class="instructions">
@@ -328,7 +348,7 @@
             
             <div class="format-types">
                 <div class="format-type">
-                    <h4>🔘 SINGLE (Selección Única)</h4>
+                    <h4>📘 SINGLE (Selección Única)</h4>
                     <p><strong>question_type:</strong> <code>SINGLE</code></p>
                     <p><strong>Answer:</strong> Una letra (ej: <code>A</code>, <code>B</code>, <code>C</code>)</p>
                 </div>
@@ -364,13 +384,13 @@
             
             <br>
             <button type="submit" class="submit-btn" id="submitBtn" disabled>
-                🔍 Validar y Cargar CSV
+                📝 Validar y Cargar CSV
             </button>
         </form>
         
         <div style="text-align: center; margin-top: 30px;">
             <a href="{% url 'examen' %}" style="color: #007bff; text-decoration: none;">
-                ← Volver al Examen
+                ← Volver al Menú Principal
             </a>
         </div>
     </div>
@@ -404,11 +424,9 @@
         
         document.getElementById('uploadForm').addEventListener('submit', function() {
             const submitBtn = document.getElementById('submitBtn');
-            submitBtn.textContent = '🔍 Validando CSV...';
+            submitBtn.textContent = '📝 Validando CSV...';
             submitBtn.disabled = true;
         });
-
-        
     </script>
 </body>
 </html>

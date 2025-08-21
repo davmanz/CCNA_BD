@@ -120,6 +120,7 @@
             display: flex;
             gap: 15px;
             justify-content: center;
+            flex-wrap: wrap;
         }
         
         .btn {
@@ -130,6 +131,7 @@
             font-size: 1em;
             cursor: pointer;
             transition: all 0.2s;
+            display: inline-block;
         }
         
         .btn-primary {
@@ -149,6 +151,16 @@
         
         .btn-secondary:hover {
             background-color: #545b62;
+            transform: translateY(-2px);
+        }
+        
+        .btn-home {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-home:hover {
+            background-color: #1e7e34;
             transform: translateY(-2px);
         }
         
@@ -249,7 +261,16 @@
         {% endif %}
         
         <div class="action-buttons">
-            <a href="{% url 'examen' %}" class="btn btn-primary">🔄 Intentar de Nuevo</a>
+            <!-- Botón dinámico según el tipo de examen -->
+            {% if exam_type == 'selection' %}
+                <a href="{% url 'selection_exam' %}" class="btn btn-primary">🔄 Repetir Examen de Selección</a>
+            {% elif exam_type == 'drag' %}
+                <a href="{% url 'drag_exam' %}" class="btn btn-primary">🔄 Repetir Examen Drag & Drop</a>
+            {% else %}
+                <a href="{% url 'selection_exam' %}" class="btn btn-primary">🔄 Intentar de Nuevo</a>
+            {% endif %}
+            
+            <a href="{% url 'examen' %}" class="btn btn-home">🏠 Menú Principal</a>
             <a href="/admin/" class="btn btn-secondary">⚙️ Panel de Admin</a>
         </div>
     </div>

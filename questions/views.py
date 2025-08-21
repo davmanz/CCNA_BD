@@ -8,6 +8,11 @@ from django.http import HttpResponseRedirect
 from .models import SingleChoiceQuestion, MultipleChoiceQuestion, DragAndDropQuestion
 
 def exam_view(request):
+    """Vista principal - menú de opciones"""
+    return render(request, 'exam/index.html')
+
+def selection_exam_view(request):
+    """Vista para preguntas de selección (SINGLE y MULTI)"""
     if request.method == "POST":
         correct_answers = 0
         total_questions = 0
@@ -59,6 +64,35 @@ def exam_view(request):
             if sorted(user_options) == sorted(correct_options):
                 correct_answers += 1
         
+        # Calcular el puntaje
+        score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+        context = {
+            'score': score, 
+            'correct_answers': correct_answers, 
+            'total_questions': total_questions,
+            'exam_type': 'selection'
+        }
+        return render(request, 'exam/results.html', context)
+    
+    else:
+        # Obtener solo preguntas de selección (SINGLE y MULTI)
+        single_choice_questions = SingleChoiceQuestion.objects.all()
+        multiple_choice_questions = MultipleChoiceQuestion.objects.all()
+
+        # Mezclar preguntas aleatoriamente
+        questions = list(single_choice_questions) + list(multiple_choice_questions)
+        random.shuffle(questions)
+
+        context = {'questions': questions}
+        return render(request, 'exam/selection_exam.html', context)
+
+def drag_exam_view(request):
+    """Vista para preguntas drag and drop"""
+    if request.method == "POST":
+        # Por ahora placeholder para cuando implementemos drag and drop
+        correct_answers = 0
+        total_questions = 0
+        
         # Verificar las respuestas de las preguntas drag and drop
         drag_and_drop_questions = DragAndDropQuestion.objects.all()
         for question in drag_and_drop_questions:
@@ -78,22 +112,14 @@ def exam_view(request):
         context = {
             'score': score, 
             'correct_answers': correct_answers, 
-            'total_questions': total_questions
+            'total_questions': total_questions,
+            'exam_type': 'drag'
         }
         return render(request, 'exam/results.html', context)
     
     else:
-        # Obtener todas las preguntas de cada tipo
-        single_choice_questions = SingleChoiceQuestion.objects.all()
-        multiple_choice_questions = MultipleChoiceQuestion.objects.all()
-        drag_and_drop_questions = DragAndDropQuestion.objects.all()
-
-        # Mezclar preguntas aleatoriamente
-        questions = list(single_choice_questions) + list(multiple_choice_questions) + list(drag_and_drop_questions)
-        random.shuffle(questions)
-
-        context = {'questions': questions}
-        return render(request, 'exam/index.html', context)
+        # Por ahora mostrar página de "próximamente"
+        return render(request, 'exam/drag_exam.html')
 
 def upload_csv_view(request):
     # Confirmación para aplicar cambios
