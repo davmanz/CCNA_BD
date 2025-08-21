@@ -1,17 +1,414 @@
-<!-- templates/exam/upload_csv.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Cargar CSV</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargar Preguntas desde CSV</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .upload-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .validation-errors {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .validation-errors h3 {
+            color: #721c24;
+            margin-top: 0;
+        }
+        
+        .validation-errors ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .validation-errors li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .upload-form {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin: 20px 0;
+        }
+        
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-input-button {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+        
+        .file-input-button:hover {
+            background-color: #0056b3;
+        }
+        
+        .file-name {
+            margin-top: 10px;
+            font-style: italic;
+            color: #666;
+        }
+        
+        .submit-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.2s;
+        }
+        
+        .submit-btn:hover {
+            background-color: #1e7e34;
+        }
+        
+        .submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .instructions {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .instructions h3 {
+            color: #495057;
+            margin-top: 0;
+        }
+        
+        .table-example {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+        
+        .table-example th,
+        .table-example td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .table-example th {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+        
+        .format-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .format-type {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .format-type h4 {
+            color: #007bff;
+            margin-top: 0;
+        }
+        
+        .format-type code {
+            background-color: #e9ecef;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        .clear-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background-color 0.2s;
+        }
+        
+        .clear-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
 </head>
 <body>
-    <h1>Cargar Preguntas desde CSV</h1>
+    <div class="upload-container">
+        <h1>📂 Cargar Preguntas desde CSV</h1>
+        
+        {% if validation_errors %}
+            <div class="validation-errors">
+                <h3>⚠️ Errores de Validación Encontrados</h3>
+                <p>El CSV no puede ser cargado debido a los siguientes errores:</p>
+                <ul>
+                    {% for error in validation_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                <p><strong>Por favor, corrige estos errores en tu CSV y vuelve a intentarlo.</strong></p>
+            </div>
+        {% endif %}
+        
+        {% if error %}
+            <div class="alert alert-error">
+                <strong>Error:</strong> {{ error }}
+            </div>
+        {% endif %}
+        
+        {% if success_message %}
+            <div class="alert alert-success">
+                {{ success_message }}
+                <br><br>
+                <a href="/admin/" style="color: #155724; text-decoration: underline;">Ver en Admin</a> |
+                <a href="{% url 'examen' %}" style="color: #155724; text-decoration: underline;">Ir al Examen</a>
+            </div>
+        {% endif %}
+        
+        {% if not validation_errors %}
+            <div class="alert alert-info">
+                <strong>💡 Tip:</strong> El sistema validará tu CSV antes de cargarlo. Si hay errores, te mostrará exactamente qué líneas necesitan corrección.
+            </div>
+        {% endif %}
 
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Cargar CSV</button>
-    </form>
+        {% if pending_confirmation %}
+  <div class="alert alert-info"><strong>Se detectaron cambios.</strong> Revisa y confirma para aplicar.</div>
+
+  <div class="validation-errors" style="background:#fff;border-color:#ddd;">
+    <h3>Propuestas de cambio</h3>
+    <ul>
+      {% for c in proposed_changes %}
+        <li>
+          <strong>{{ c.np }}</strong> ({{ c.question_type }}) – 
+          {% if c.action == 'CREATE' %} 🆕 Crear
+          {% elif c.action == 'UPDATE' %} ✏️ Actualizar
+          {% endif %}
+          {% if c.action == 'UPDATE' %}
+            <ul>
+              {% for field, values in c.diff.items %}
+                <li><code>{{ field }}</code>: "<em>{{ values.old }}</em>" → "<strong>{{ values.new }}</strong>"</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="confirm" value="1">
+    <input type="hidden" name="proposed_changes" value='{{ proposed_changes_json|escape }}'>
+    <button type="submit" class="submit-btn">✅ Confirmar y aplicar cambios</button>
+    <a href="{% url 'upload_csv' %}" class="clear-btn" style="margin-left:10px;">Cancelar</a>
+  </form>
+{% endif %}
+
+        
+        <div class="instructions">
+            <h3>📋 Formato del Archivo CSV</h3>
+            <p>Tu archivo CSV debe tener las siguientes columnas en este orden:</p>
+            
+            <table class="table-example">
+                <thead>
+                    <tr>
+                        <th>NP</th>
+                        <th>Question</th>
+                        <th>OptionA</th>
+                        <th>OptionB</th>
+                        <th>OptionC</th>
+                        <th>OptionD</th>
+                        <th>OptionE</th>
+                        <th>Answer</th>
+                        <th>question_type</th>
+                        <th>Image</th>
+                        <th>ImageFile</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Q1</td>
+                        <td>Texto de la pregunta</td>
+                        <td>Opción A</td>
+                        <td>Opción B</td>
+                        <td>Opción C</td>
+                        <td>Opción D</td>
+                        <td>Opcional</td>
+                        <td>Ver formatos</td>
+                        <td>SINGLE/MULTI/DRAG</td>
+                        <td>0/1</td>
+                        <td>1.png (opcional)</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="alert alert-info" style="margin-top: 15px;">
+                <strong>📸 Manejo de Imágenes:</strong><br>
+                • <strong>Image:</strong> 1 = tiene imagen, 0 = no tiene imagen<br>
+                • <strong>ImageFile (opcional):</strong> Nombre exacto del archivo (ej: "abc123.png", "topology1.jpg")<br>
+                • <strong>Si no hay ImageFile:</strong> Se usará NP para generar el nombre (Q1 → 1.png)<br>
+                • <strong>Carpeta:</strong> Las imágenes deben estar en la carpeta /images/ del proyecto
+            </div>
+            
+            <div class="format-types">
+                <div class="format-type">
+                    <h4>🔘 SINGLE (Selección Única)</h4>
+                    <p><strong>question_type:</strong> <code>SINGLE</code></p>
+                    <p><strong>Answer:</strong> Una letra (ej: <code>A</code>, <code>B</code>, <code>C</code>)</p>
+                </div>
+                
+                <div class="format-type">
+                    <h4>☑️ MULTI (Selección Múltiple)</h4>
+                    <p><strong>question_type:</strong> <code>MULTI</code></p>
+                    <p><strong>Answer:</strong> Letras separadas por guión (ej: <code>A-C-D</code>)</p>
+                </div>
+                
+                <div class="format-type">
+                    <h4>🎯 DRAG (Arrastrar y Soltar)</h4>
+                    <p><strong>question_type:</strong> <code>DRAG</code></p>
+                    <p><strong>OptionA:</strong> Array JSON de opciones</p>
+                    <p><strong>Answer:</strong> Array JSON de respuestas correctas</p>
+                </div>
+            </div>
+        </div>
+        
+        <form method="POST" enctype="multipart/form-data" class="upload-form" id="uploadForm">
+            {% csrf_token %}
+            
+            <div class="file-input-wrapper">
+                <input type="file" name="csv_file" accept=".csv" class="file-input" id="csvFile" required>
+                <button type="button" class="file-input-button">
+                    📁 Seleccionar Archivo CSV
+                </button>
+            </div>
+            
+            <div class="file-name" id="fileName">
+                Ningún archivo seleccionado
+            </div>
+            
+            <br>
+            <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                🔍 Validar y Cargar CSV
+            </button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="{% url 'examen' %}" style="color: #007bff; text-decoration: none;">
+                ← Volver al Examen
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const fileName = document.getElementById('fileName');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                fileName.textContent = `📄 ${file.name}`;
+                fileName.style.color = '#28a745';
+                submitBtn.disabled = false;
+                
+                if (!file.name.toLowerCase().endsWith('.csv')) {
+                    fileName.textContent = '⚠️ Por favor selecciona un archivo .csv';
+                    fileName.style.color = '#dc3545';
+                    submitBtn.disabled = true;
+                }
+            } else {
+                fileName.textContent = 'Ningún archivo seleccionado';
+                fileName.style.color = '#666';
+                submitBtn.disabled = true;
+            }
+        });
+        
+        document.querySelector('.file-input-button').addEventListener('click', function() {
+            document.getElementById('csvFile').click();
+        });
+        
+        document.getElementById('uploadForm').addEventListener('submit', function() {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = '🔍 Validando CSV...';
+            submitBtn.disabled = true;
+        });
+
+        
+    </script>
 </body>
 </html>
