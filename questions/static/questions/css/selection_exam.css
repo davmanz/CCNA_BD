@@ -42,7 +42,7 @@ body {
     gap: 8px;
     padding: 12px 20px;
     background: rgba(255, 255, 255, 0.2);
-    color: white;
+    color: rgb(0, 0, 0);
     text-decoration: none;
     border-radius: 25px;
     font-weight: 500;
@@ -52,7 +52,7 @@ body {
 }
 
 .back-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(155, 105, 221, 0.808);
     transform: translateX(-5px);
 }
 
@@ -172,7 +172,7 @@ body {
     100% { transform: translateX(100%); }
 }
 
-/* Question Styles - Orden: Imagen -> Pregunta -> Opciones */
+/* Question Styles */
 .question {
     background: white;
     border-radius: 20px;
@@ -195,7 +195,7 @@ body {
     box-sizing: border-box;
 }
 
-/* Image Styles - Ahora va primero */
+/* Image Styles */
 .question-image {
     margin: 0 0 25px 0;
     text-align: center;
@@ -243,15 +243,14 @@ body {
     animation: spin 1s linear infinite;
 }
 
-/* Legend/Pregunta - Ahora va después de la imagen */
-.question legend {
+/* Pregunta - usando h2.question-text */
+.question .question-text {
     font-size: 1.3rem;
     font-weight: 600;
     color: #333;
     line-height: 1.6;
     margin: 0 0 25px 0;
     position: relative;
-    border: none;
     width: 100%;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -342,14 +341,22 @@ body {
     color: #ffffff;
 }
 
-.option-text:hover{
+.option-text:hover {
     color: #000000;
 }
 
-#question-text{
+#question-text {
     display: block;
     width: 100%;
     text-align: center;
+}
+
+/* Forzar texto negro cuando hay feedback */
+.option.correct .option-text,
+.option.correct .option-letter,
+.option.wrong .option-text,
+.option.wrong .option-letter {
+    color: #000 !important;
 }
 
 /* Navigation */
@@ -497,8 +504,8 @@ body {
         margin-bottom: 20px;
     }
 
-    /* Legend/Pregunta en móvil - sin badge */
-    .question legend {
+    /* Pregunta en móvil */
+    .question .question-text {
         font-size: 1.1rem;
         padding: 15px 0;
         margin: 0 0 20px 0;
@@ -506,7 +513,7 @@ body {
         overflow-wrap: anywhere;
     }
 
-    /* Opciones en móvil - letras mejor alineadas */
+    /* Opciones en móvil */
     .option label {
         gap: 12px;
         padding: 15px;

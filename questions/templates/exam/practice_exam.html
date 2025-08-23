@@ -60,38 +60,30 @@
           </div>
           {% endif %}
 
-          <legend class="question-text" id="question-text">
+          <h2 class="question-text" id="question-text">
             {{ q.text|linebreaksbr }}
-          </legend>
+          </h2>
 
-          {% if q.question_type == "SINGLE" %}
-            {% for letter, content in [('A', q.option_a), ('B', q.option_b), ('C', q.option_c), ('D', q.option_d), ('E', q.option_e)] %}
-              {% if content %}
-              <div class="option">
-                <label>
-                  <input type="radio" name="q_{{ q.id }}" value="{{ letter }}">
-                  <div class="option-text">
-                    <span class="option-letter">{{ letter }})</span>
-                    <span class="option-content">{{ content|linebreaksbr }}</span>
-                  </div>
-                </label>
-              </div>
-              {% endif %}
-            {% endfor %}
-          {% elif q.question_type == "MULTI" %}
-            {% for letter, content in [('A', q.option_a), ('B', q.option_b), ('C', q.option_c), ('D', q.option_d), ('E', q.option_e)] %}
-              {% if content %}
-              <div class="option">
-                <label>
-                  <input type="checkbox" name="q_{{ q.id }}" value="{{ letter }}">
-                  <div class="option-text">
-                    <span class="option-letter">{{ letter }})</span>
-                    <span class="option-content">{{ content|linebreaksbr }}</span>
-                  </div>
-                </label>
-              </div>
-              {% endif %}
-            {% endfor %}
+          {# Un solo bucle para SINGLE y MULTI, usando q.options #}
+          {% for letter, content in q.options %}
+            {% if content %}
+            <div class="option">
+              <label>
+                <input
+                  type="{% if q.question_type == 'SINGLE' %}radio{% else %}checkbox{% endif %}"
+                  name="q_{{ q.id }}"
+                  value="{{ letter }}"
+                >
+                <div class="option-text">
+                  <span class="option-letter">{{ letter }})</span>
+                  <span class="option-content">{{ content|linebreaksbr }}</span>
+                </div>
+              </label>
+            </div>
+            {% endif %}
+          {% endfor %}
+
+          {% if q.question_type == "MULTI" %}
             <button type="button" class="nav-btn confirm-multi">Confirmar selección</button>
           {% endif %}
 

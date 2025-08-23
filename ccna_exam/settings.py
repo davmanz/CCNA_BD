@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'oe*24dz-o@t44+&_$r-ubx5@cti+59==df!a@7zct1=gaf%q27'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -62,7 +62,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'ccna_db',
         'USER': 'ccna_user',
-        'HOST': 'db',
+        'HOST': '127.0.0.1',
         'PORT': '5432',
         'PASSWORD': 'ccna_password',
     }

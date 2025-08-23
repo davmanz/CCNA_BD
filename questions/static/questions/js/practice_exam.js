@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
           // Auto-avanzar suave en 1100 ms (opcional)
           setTimeout(() => {
             if (current < questions.length - 1) show(current + 1);
-          }, 1100);
+          }, 2000);
   
         } catch (e) {
           const badge = fieldset.querySelector('.result-badge');

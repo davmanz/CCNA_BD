@@ -3,6 +3,7 @@ import csv
 import json
 import random
 from .forms import CSVUploadForm
+import random
 from django.shortcuts import render
 from .models import SingleChoiceQuestion, MultipleChoiceQuestion, DragAndDropQuestion
 from django.http import JsonResponse, HttpResponseBadRequest
@@ -508,43 +509,46 @@ def practice_exam_view(request):
     Modo práctica: muestra preguntas con verificación inmediata vía AJAX.
     Reutiliza modelos actuales (SingleChoiceQuestion, MultipleChoiceQuestion).
     """
-    # Cargar preguntas
     single_choice_questions = SingleChoiceQuestion.objects.all()
     multiple_choice_questions = MultipleChoiceQuestion.objects.all()
 
-    # Unificamos para el template. Importante: NO incluir la respuesta correcta en HTML
     questions = []
     for q in single_choice_questions:
         questions.append({
             'id': q.id,
             'question_type': 'SINGLE',
             'text': q.text,
-            'option_a': q.option_a,
-            'option_b': q.option_b,
-            'option_c': q.option_c,
-            'option_d': q.option_d,
-            'option_e': q.option_e,
+            'options': [   # 👈 preparamos lista de opciones
+                ('A', q.option_a),
+                ('B', q.option_b),
+                ('C', q.option_c),
+                ('D', q.option_d),
+                ('E', q.option_e),
+            ],
             'has_image': q.has_image,
             'image_path': q.image_path,
         })
+
     for q in multiple_choice_questions:
         questions.append({
             'id': q.id,
             'question_type': 'MULTI',
             'text': q.text,
-            'option_a': q.option_a,
-            'option_b': q.option_b,
-            'option_c': q.option_c,
-            'option_d': q.option_d,
-            'option_e': q.option_e,
+            'options': [   # 👈 igual aquí
+                ('A', q.option_a),
+                ('B', q.option_b),
+                ('C', q.option_c),
+                ('D', q.option_d),
+                ('E', q.option_e),
+            ],
             'has_image': q.has_image,
             'image_path': q.image_path,
         })
 
-    import random
     random.shuffle(questions)
 
     return render(request, 'exam/practice_exam.html', {'questions': questions})
+
 
 @require_POST
 def check_answer_api(request):

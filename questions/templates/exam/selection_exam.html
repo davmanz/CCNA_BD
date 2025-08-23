@@ -47,9 +47,9 @@
                         {% endif %}
 
                         {% comment %} SEGUNDO: El texto de la pregunta {% endcomment %}
-                        <legend class="question-text" id="question-text">
+                        <h2 class="question-text" id="question-text">
                             {{ question.text|linebreaksbr }}
-                        </legend>
+                        </h2>
 
                         {% comment %} TERCERO: Las opciones con letras alineadas {% endcomment %}
                         {% if question.question_type == "SINGLE" %}
