@@ -506,47 +506,52 @@ def study_mode(request):
 
 def practice_exam_view(request):
     """
-    Modo práctica: muestra preguntas con verificación inmediata vía AJAX.
-    Reutiliza modelos actuales (SingleChoiceQuestion, MultipleChoiceQuestion).
+    Modo práctica: preguntas con verificación inmediata vía AJAX.
     """
     single_choice_questions = SingleChoiceQuestion.objects.all()
     multiple_choice_questions = MultipleChoiceQuestion.objects.all()
 
+    def build_image_fields(q):
+        # intenta usar la propiedad del modelo; si no, cae al FileField .url
+        path = getattr(q, "image_path", None) or getattr(getattr(q, "image", None), "url", None)
+        return bool(path), path  # (has_image, image_path)
+
+    def build_options(q):
+        raw = [
+            ('A', q.option_a),
+            ('B', q.option_b),
+            ('C', q.option_c),
+            ('D', q.option_d),
+            ('E', getattr(q, "option_e", None)),
+        ]
+        # filtra las opciones vacías/None para evitar <div> vacíos
+        return [(k, v) for (k, v) in raw if v not in (None, "",)]
+
     questions = []
+
     for q in single_choice_questions:
+        has_image, image_path = build_image_fields(q)
         questions.append({
             'id': q.id,
             'question_type': 'SINGLE',
             'text': q.text,
-            'options': [   # 👈 preparamos lista de opciones
-                ('A', q.option_a),
-                ('B', q.option_b),
-                ('C', q.option_c),
-                ('D', q.option_d),
-                ('E', q.option_e),
-            ],
-            'has_image': q.has_image,
-            'image_path': q.image_path,
+            'options': build_options(q),
+            'has_image': has_image,
+            'image_path': image_path,
         })
 
     for q in multiple_choice_questions:
+        has_image, image_path = build_image_fields(q)
         questions.append({
             'id': q.id,
             'question_type': 'MULTI',
             'text': q.text,
-            'options': [   # 👈 igual aquí
-                ('A', q.option_a),
-                ('B', q.option_b),
-                ('C', q.option_c),
-                ('D', q.option_d),
-                ('E', q.option_e),
-            ],
-            'has_image': q.has_image,
-            'image_path': q.image_path,
+            'options': build_options(q),
+            'has_image': has_image,
+            'image_path': image_path,
         })
 
     random.shuffle(questions)
-
     return render(request, 'exam/practice_exam.html', {'questions': questions})
 
 

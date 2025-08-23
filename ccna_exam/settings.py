@@ -1,16 +1,17 @@
 import os
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8IJ-xjEp2tzLSTnjjM3qQLoxPtabwkpN2DD3bWhPy-GjCsOK0QEinXAd8iqJG2pQqmM')
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-8IJ-xjEp2tzLSTnjjM3qQLoxPtabwkpN2DD3bWhPy-GjCsOK0QEinXAd8iqJG2pQqmM')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True')
+DEBUG = config('DEBUG', default='True', cast=bool)
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
 
 # Application definition
 
@@ -60,11 +61,11 @@ WSGI_APPLICATION = 'ccna_exam.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'ccna_db'),
-        'USER': os.environ.get('DB_USER', 'ccna_user'),
-        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'ccna_password'),
+        'NAME': config('POSTGRES_DB', default='ccna_db'),
+        'USER': config('POSTGRES_USER', default='ccna_user'),
+        'HOST': config('POSTGRES_HOST', default='127.0.0.1'),
+        'PORT': config('POSTGRES_PORT', default='5432'),
+        'PASSWORD': config('POSTGRES_PASSWORD', default='ccna_password'),
     }
 }
 
