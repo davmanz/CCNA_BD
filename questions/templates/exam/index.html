@@ -28,6 +28,24 @@
                     <div class="btn-description">Preguntas de selección única y múltiple</div>
                 </div>
             </a>
+
+            <!-- NUEVO: Modo práctica -->
+            <a href="{% url 'practice_exam' %}" class="menu-btn practice">
+                <span class="icon">⚡</span>
+                <div class="btn-text">
+                    <div class="btn-title">Modo práctica (feedback inmediato)</div>
+                    <div class="btn-description">Muestra si aciertas al instante y marca la respuesta correcta</div>
+                </div>
+            </a>
+
+            <!-- NUEVO: Modo estudio -->
+            <a href="{% url 'study_mode' %}" class="menu-btn study">
+                <span class="icon">📖</span>
+                <div class="btn-text">
+                    <div class="btn-title">Modo estudio</div>
+                    <div class="btn-description">Revisa respuestas correctas y aprende con explicaciones</div>
+                </div>
+            </a>
             
             <a href="{% url 'drag_exam' %}" class="menu-btn drag">
                 <span class="icon">🎯</span>

@@ -61,31 +61,49 @@ h1 {
     box-shadow: 0 6px 20px rgba(0,123,255,0.4);
 }
 
+/* Botón CSV */
 .menu-btn.csv {
     background: linear-gradient(135deg, #28a745, #1e7e34);
     box-shadow: 0 4px 15px rgba(40,167,69,0.3);
 }
-
 .menu-btn.csv:hover {
     box-shadow: 0 6px 20px rgba(40,167,69,0.4);
 }
 
+/* Botón Selección */
 .menu-btn.selection {
     background: linear-gradient(135deg, #007bff, #0056b3);
     box-shadow: 0 4px 15px rgba(0,123,255,0.3);
 }
-
 .menu-btn.selection:hover {
     box-shadow: 0 6px 20px rgba(0,123,255,0.4);
 }
 
+/* Botón Drag & Drop */
 .menu-btn.drag {
     background: linear-gradient(135deg, #6f42c1, #563d7c);
     box-shadow: 0 4px 15px rgba(111,66,193,0.3);
 }
-
 .menu-btn.drag:hover {
     box-shadow: 0 6px 20px rgba(111,66,193,0.4);
+}
+
+/* NUEVO: Botón Modo Práctica */
+.menu-btn.practice {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+}
+.menu-btn.practice:hover {
+    box-shadow: 0 6px 20px rgba(16,185,129,0.45);
+}
+
+/* NUEVO: Botón Modo Estudio */
+.menu-btn.study {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+}
+.menu-btn.study:hover {
+    box-shadow: 0 6px 20px rgba(59,130,246,0.45);
 }
 
 .icon {
@@ -121,7 +139,6 @@ h1 {
     text-decoration: none;
     font-weight: 500;
 }
-
 .admin-link:hover {
     text-decoration: underline;
 }

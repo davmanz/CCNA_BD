@@ -15,8 +15,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar el proyecto
 COPY . .
 
+# Copiar el script de entrada al contenedor
+COPY ./entrypoint.sh /usr/src/app/entrypoint.sh
+
+# Dar permisos de ejecución al script
+RUN chmod +x /usr/src/app/entrypoint.sh
+
 # Exponer el puerto en el que correrá Gunicorn
 EXPOSE 8000
 
-# Comando para ejecutar la aplicación
-CMD ["gunicorn", "ccna_exam.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Comando para ejecutar la aplicación (usando el entrypoint)
+CMD ["/usr/src/app/entrypoint.sh"]
