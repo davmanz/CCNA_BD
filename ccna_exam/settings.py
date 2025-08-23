@@ -5,12 +5,12 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-SECRET_KEY = 'oe*24dz-o@t44+&_$r-ubx5@cti+59==df!a@7zct1=gaf%q27'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-8IJ-xjEp2tzLSTnjjM3qQLoxPtabwkpN2DD3bWhPy-GjCsOK0QEinXAd8iqJG2pQqmM')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
 # Application definition
 
@@ -60,11 +60,11 @@ WSGI_APPLICATION = 'ccna_exam.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ccna_db',
-        'USER': 'ccna_user',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
-        'PASSWORD': 'ccna_password',
+        'NAME': os.environ.get('DB_NAME', 'ccna_db'),
+        'USER': os.environ.get('DB_USER', 'ccna_user'),
+        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'ccna_password'),
     }
 }
 
