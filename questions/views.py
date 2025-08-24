@@ -3,9 +3,12 @@ import csv
 import json
 import random
 from .forms import CSVUploadForm
+import random
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
 from .models import SingleChoiceQuestion, MultipleChoiceQuestion, DragAndDropQuestion
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 def exam_view(request):
     """Vista principal - menú de opciones"""
@@ -290,7 +293,6 @@ def upload_csv_view(request):
     # GET o sin archivo
     return render(request, 'exam/upload_csv.html', {'form': CSVUploadForm()})
 
-
 def _diff_model(obj, payload, fields):
     """Compara obj vs payload y devuelve ('UPDATE', diff) o ('SKIP', {})"""
     if obj is None:
@@ -402,3 +404,243 @@ def validate_csv_content(csv_content):
         errors.append(f"❌ Error leyendo CSV: {str(e)}")
     
     return errors
+
+def study_mode(request):
+    """
+    Vista para el modo estudio - muestra preguntas con respuestas correctas
+    Compatible con tus modelos: SingleChoiceQuestion, MultipleChoiceQuestion, DragAndDropQuestion
+    """
+    try:
+        # Obtener preguntas de selección (como en tu selection_exam_view)
+        single_choice_questions = SingleChoiceQuestion.objects.all()
+        multiple_choice_questions = MultipleChoiceQuestion.objects.all()
+        
+        # Preparar datos para el template
+        questions_data = []
+        
+        # Procesar preguntas de selección única
+        for question in single_choice_questions:
+            # Determinar cuál opción es la correcta
+            correct_answers = []
+            option_mapping = {
+                'A': question.option_a,
+                'B': question.option_b,
+                'C': question.option_c,
+                'D': question.option_d,
+                'E': question.option_e if question.option_e else None
+            }
+            
+            # Encontrar la letra de la respuesta correcta
+            for letter, option_text in option_mapping.items():
+                if option_text == question.answer:
+                    correct_answers.append(letter)
+                    break
+            
+            questions_data.append({
+                'id': question.id,
+                'text': question.text,
+                'question_type': 'SINGLE',
+                'option_a': question.option_a,
+                'option_b': question.option_b,
+                'option_c': question.option_c,
+                'option_d': question.option_d,
+                'option_e': question.option_e if question.option_e else None,
+                'correct_answers': correct_answers,
+                'explanation': getattr(question, 'explanation', None),
+                'has_image': getattr(question, 'has_image', False),
+                'image_path': question.image_path
+            })
+        
+        # Procesar preguntas de selección múltiple
+        for question in multiple_choice_questions:
+            # Las respuestas correctas están separadas por "-"
+            correct_answer_texts = question.answer.split("-")
+            correct_answers = []
+            
+            option_mapping = {
+                'A': question.option_a,
+                'B': question.option_b,
+                'C': question.option_c,
+                'D': question.option_d,
+                'E': question.option_e if question.option_e else None
+            }
+            
+            # Encontrar las letras de las respuestas correctas
+            for letter, option_text in option_mapping.items():
+                if option_text in correct_answer_texts:
+                    correct_answers.append(letter)
+            
+            questions_data.append({
+                'id': question.id,
+                'text': question.text,
+                'question_type': 'MULTI',
+                'option_a': question.option_a,
+                'option_b': question.option_b,
+                'option_c': question.option_c,
+                'option_d': question.option_d,
+                'option_e': question.option_e if question.option_e else None,
+                'correct_answers': correct_answers,
+                'explanation': getattr(question, 'explanation', None),
+                'has_image': getattr(question, 'has_image', False),
+                'image_path': question.image_path
+            })
+        
+        # Mezclar preguntas aleatoriamente (como en tu vista original)
+        random.shuffle(questions_data)
+        
+        context = {
+            'questions': questions_data,
+            'total_questions': len(questions_data),
+            'mode': 'study'
+        }
+        
+        return render(request, 'exam/study_exam.html', context)
+        
+    except Exception as e:
+        # En caso de error, mostrar página con mensaje
+        context = {
+            'questions': [],
+            'error_message': f'Error al cargar preguntas: {str(e)}'
+        }
+        return render(request, 'exam/study_exam.html', context)
+
+def practice_exam_view(request):
+    """
+    Modo práctica: preguntas con verificación inmediata vía AJAX.
+    """
+    single_choice_questions = SingleChoiceQuestion.objects.all()
+    multiple_choice_questions = MultipleChoiceQuestion.objects.all()
+
+    def build_image_fields(q):
+        # intenta usar la propiedad del modelo; si no, cae al FileField .url
+        path = getattr(q, "image_path", None) or getattr(getattr(q, "image", None), "url", None)
+        return bool(path), path  # (has_image, image_path)
+
+    def build_options(q):
+        raw = [
+            ('A', q.option_a),
+            ('B', q.option_b),
+            ('C', q.option_c),
+            ('D', q.option_d),
+            ('E', getattr(q, "option_e", None)),
+        ]
+        # filtra las opciones vacías/None para evitar <div> vacíos
+        return [(k, v) for (k, v) in raw if v not in (None, "",)]
+
+    questions = []
+
+    for q in single_choice_questions:
+        has_image, image_path = build_image_fields(q)
+        questions.append({
+            'id': q.id,
+            'question_type': 'SINGLE',
+            'text': q.text,
+            'options': build_options(q),
+            'has_image': has_image,
+            'image_path': image_path,
+        })
+
+    for q in multiple_choice_questions:
+        has_image, image_path = build_image_fields(q)
+        questions.append({
+            'id': q.id,
+            'question_type': 'MULTI',
+            'text': q.text,
+            'options': build_options(q),
+            'has_image': has_image,
+            'image_path': image_path,
+        })
+
+    random.shuffle(questions)
+    return render(request, 'exam/practice_exam.html', {'questions': questions})
+
+
+@require_POST
+def check_answer_api(request):
+    """
+    Endpoint de verificación inmediata.
+    Espera:
+      - question_id (int)
+      - question_type ('SINGLE' | 'MULTI')
+      - answer: para SINGLE -> 'A'|'B'|'C'|'D'|'E'
+                para MULTI  -> lista de letras ['A','D',...]
+    Respuesta:
+      { correct: bool, correct_letters: ['B'] o ['A','D'], explain: str|null }
+    """
+    try:
+        qid = int(request.POST.get('question_id', '').strip())
+        qtype = (request.POST.get('question_type', '') or '').strip().upper()
+        if not qid or qtype not in ('SINGLE', 'MULTI'):
+            return HttpResponseBadRequest('Invalid payload')
+
+        if qtype == 'SINGLE':
+            user_letter = (request.POST.get('answer', '') or '').strip().upper()
+            if user_letter not in ('A','B','C','D','E'):
+                return HttpResponseBadRequest('Invalid answer for SINGLE')
+
+            q = SingleChoiceQuestion.objects.get(id=qid)
+
+            option_mapping = {
+                'A': q.option_a,
+                'B': q.option_b,
+                'C': q.option_c,
+                'D': q.option_d,
+                'E': q.option_e
+            }
+            # Verdadero si el texto de la letra elegida coincide con la respuesta guardada
+            is_correct = (option_mapping.get(user_letter) == q.answer)
+
+            # Hallar la(s) letra(s) correcta(s) (en SINGLE será 1 letra)
+            correct_letters = []
+            for letter, text in option_mapping.items():
+                if text == q.answer:
+                    correct_letters.append(letter)
+                    break
+
+            return JsonResponse({
+                'correct': is_correct,
+                'correct_letters': correct_letters,
+                'explain': getattr(q, 'explanation', None)
+            })
+
+        elif qtype == 'MULTI':
+            # answer puede llegar como lista (JS) o como string 'A,B'
+            ans = request.POST.getlist('answer')
+            if not ans:
+                # intentar coma-separado
+                raw = (request.POST.get('answer', '') or '').strip()
+                ans = [x.strip().upper() for x in raw.split(',') if x.strip()]
+            user_letters = sorted({x for x in ans if x in ('A','B','C','D','E')})
+            if not user_letters:
+                return HttpResponseBadRequest('Invalid answer list for MULTI')
+
+            q = MultipleChoiceQuestion.objects.get(id=qid)
+
+            option_mapping = {
+                'A': q.option_a,
+                'B': q.option_b,
+                'C': q.option_c,
+                'D': q.option_d,
+                'E': q.option_e
+            }
+
+            # En tu almacenamiento, MultipleChoiceQuestion.answer es textos unidos por "-"
+            correct_texts = [t.strip() for t in q.answer.split('-') if t.strip()]
+            # Mapear letras correctas comparando textos
+            correct_letters = []
+            for letter, text in option_mapping.items():
+                if text and text in correct_texts:
+                    correct_letters.append(letter)
+            correct_letters = sorted(correct_letters)
+
+            is_correct = (sorted(user_letters) == correct_letters)
+
+            return JsonResponse({
+                'correct': is_correct,
+                'correct_letters': correct_letters,
+                'explain': getattr(q, 'explanation', None)
+            })
+
+    except (ValueError, SingleChoiceQuestion.DoesNotExist, MultipleChoiceQuestion.DoesNotExist) as e:
+        return HttpResponseBadRequest(f'Error: {str(e)}')
+

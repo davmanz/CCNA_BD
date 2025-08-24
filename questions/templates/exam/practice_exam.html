@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Práctica CCNA - Feedback inmediato</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'questions/css/selection_exam.css' %}">
+  <style>
+    /* Clases mínimas extra para feedback inmediato */
+    .option.correct { border-color: #22c55e; background: rgba(34,197,94,0.08); }
+    .option.wrong   { border-color: #ef4444; background: rgba(239,68,68,0.08); }
+    .option.locked  { opacity: 0.85; pointer-events: none; }
+    .result-badge { margin-top: 10px; font-weight: 600; }
+    .result-ok { color: #16a34a; }
+    .result-bad { color: #dc2626; }
+    .confirm-multi { margin-top: 10px; }
+    .result-pending { color: #0f766e; font-weight: 600; }
+    .retry-btn {
+      margin-left: 10px; padding: 8px 14px; border: 0; border-radius: 18px; cursor: pointer; font-weight: 600;
+      background: linear-gradient(135deg, #f59e0b, #f97316); color: #fff; transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .retry-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(249,115,22,.35); }
+    .confirm-multi[disabled] { opacity: .6; cursor: not-allowed; }
+    .question.locked .option { pointer-events: none; opacity: .95; }
+  </style>
+</head>
+<body>
+  <div class="exam-container">
+    <a href="{% url 'examen' %}" class="back-btn">← Volver al Menú Principal</a>
+
+    <div class="header">
+      <h1>🧪 Modo Práctica (Feedback inmediato)</h1>
+      <p class="exam-info">Al elegir, verás si es correcto tras la verificación.</p>
+    </div>
+
+    {% csrf_token %}
+    <input type="hidden" id="csrfToken" value="{{ csrf_token }}"/>
+
+    {% if questions %}
+      <!-- Marcador en vivo -->
+      <div class="progress-wrapper">
+        <div class="progress-top">
+          <div id="posCard" class="stat-card">
+            <div class="stat-number">1</div>
+            <div class="stat-label">Pregunta Actual</div>
+          </div>
+          <div id="liveScore" class="stat-card">
+            <div class="stat-number">0 / 0</div>
+            <div class="stat-label">Aciertos / Intentadas</div>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="pageProgress" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Preguntas -->
+      {% for q in questions %}
+        <fieldset class="question{% if not forloop.first %} hidden{% endif %}{% if forloop.first %} active{% endif %}" 
+                  data-index="{{ forloop.counter0 }}"
+                  data-qid="{{ q.id }}"
+                  data-qtype="{{ q.question_type }}">
+          
+          {% if q.has_image and q.image_path %}
+          <div class="question-image">
+            <img src="/media/{{ q.image_path }}" alt="Imagen de la pregunta {{ forloop.counter }}">
+          </div>
+          {% endif %}
+
+          <h2 class="question-text" id="question-text">
+            {{ q.text|linebreaksbr }}
+          </h2>
+
+          {# Un solo bucle para SINGLE y MULTI, usando q.options #}
+          {% for letter, content in q.options %}
+            {% if content %}
+            <div class="option">
+              <label>
+                <input
+                  type="{% if q.question_type == 'SINGLE' %}radio{% else %}checkbox{% endif %}"
+                  name="q_{{ q.id }}"
+                  value="{{ letter }}"
+                >
+                <div class="option-text">
+                  <span class="option-letter">{{ letter }})</span>
+                  <span class="option-content">{{ content|linebreaksbr }}</span>
+                </div>
+              </label>
+            </div>
+            {% endif %}
+          {% endfor %}
+
+          {% if q.question_type == "MULTI" %}
+            <button type="button" class="nav-btn confirm-multi">Confirmar selección</button>
+          {% endif %}
+
+          <div class="result-badge" aria-live="polite"></div>
+        </fieldset>
+      {% endfor %}
+
+      <!-- Navegación -->
+      <div class="wizard-nav">
+        <button type="button" id="prevBtn" class="nav-btn" disabled>← Anterior</button>
+        <button type="button" id="nextBtn" class="nav-btn primary" disabled>Siguiente →</button>
+      </div>
+    {% else %}
+      <div class="no-questions">
+        <h3>📚 No hay preguntas disponibles</h3>
+        <p>Aún no se han cargado preguntas de selección en el sistema.</p>
+        <p><a href="{% url 'upload_csv' %}" style="color: #667eea;">Cargar preguntas desde CSV</a></p>
+      </div>
+    {% endif %}
+  </div>
+
+  <script src="{% static 'questions/js/practice_exam.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen CCNA - Modo Estudio</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'questions/css/study_exam.css' %}">
+</head>
+<body>
+    <div class="exam-container">
+        <a href="{% url 'examen' %}" class="back-btn">← Volver al Menú Principal</a>
+        
+        <div class="header">
+            <h1>📚 Modo Estudio</h1>
+            <p class="exam-info">Revisa preguntas con respuestas correctas - Navegación libre</p>
+        </div>
+
+        {% if questions %}
+            <!-- Progreso Mejorado -->
+            <div class="progress-wrapper">
+                <div class="progress-top">
+                    <div id="counter" class="stat-card">
+                        <div class="stat-number">1</div>
+                        <div class="stat-label">Pregunta Actual</div>
+                    </div>
+                    <div id="total-counter" class="stat-card">
+                        <div class="stat-number">{{ questions|length }}</div>
+                        <div class="stat-label">Total Preguntas</div>
+                    </div>
+                    <div id="study-info" class="stat-card study-mode">
+                        <div class="stat-number">📖</div>
+                        <div class="stat-label">Modo Estudio</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="pageProgress" style="width:0%"></div>
+                </div>
+            </div>
+
+            <div id="studyContainer">
+                {% for question in questions %}
+                    <div class="question{% if not forloop.first %} hidden{% endif %}{% if forloop.first %} active{% endif %}" data-index="{{ forloop.counter0 }}">
+                        
+                        {% comment %} PRIMERO: La imagen si existe {% endcomment %}
+                        {% if question.has_image and question.image_path %}
+                            <div class="question-image">
+                                <img src="/media/{{ question.image_path }}" alt="Imagen de la pregunta {{ forloop.counter }}" style="display: none;">
+                            </div>
+                        {% endif %}
+
+                        {% comment %} SEGUNDO: El texto de la pregunta {% endcomment %}
+                        <div class="question-header">
+                            <h2 class="question-text">{{ question.text|linebreaksbr }}</h2>
+                            <div class="question-type-badge">
+                                {% if question.question_type == "SINGLE" %}
+                                    Selección Única
+                                {% else %}
+                                    Selección Múltiple
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% comment %} TERCERO: Las opciones con indicadores de respuesta {% endcomment %}
+                        <div class="options-container">
+                            {% if question.question_type == "SINGLE" %}
+                                <div class="option {% if 'A' in question.correct_answers %}option-correct{% else %}option-incorrect{% endif %}">
+                                    <div class="option-indicator">
+                                        {% if 'A' in question.correct_answers %}
+                                            <span class="correct-icon">✓</span>
+                                        {% else %}
+                                            <span class="incorrect-icon">✗</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="option-text">
+                                        <span class="option-letter">A)</span>
+                                        <span class="option-content">{{ question.option_a|linebreaksbr }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="option {% if 'B' in question.correct_answers %}option-correct{% else %}option-incorrect{% endif %}">
+                                    <div class="option-indicator">
+                                        {% if 'B' in question.correct_answers %}
+                                            <span class="correct-icon">✓</span>
+                                        {% else %}
+                                            <span class="incorrect-icon">✗</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="option-text">
+                                        <span class="option-letter">B)</span>
+                                        <span class="option-content">{{ question.option_b|linebreaksbr }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="option {% if 'C' in question.correct_answers %}option-correct{% else %}option-incorrect{% endif %}">
+                                    <div class="option-indicator">
+                                        {% if 'C' in question.correct_answers %}
+                                            <span class="correct-icon">✓</span>
+                                        {% else %}
+                                            <span class="incorrect-icon">✗</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="option-text">
+                                        <span class="option-letter">C)</span>
+                                        <span class="option-content">{{ question.option_c|linebreaksbr }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="option {% if 'D' in question.correct_answers %}option-correct{% else %}option-incorrect{% endif %}">
+                                    <div class="option-indicator">
+                                        {% if 'D' in question.correct_answers %}
+                                            <span class="correct-icon">✓</span>
+                                        {% else %}
+                                            <span class="incorrect-icon">✗</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="option-text">
+                                        <span class="option-letter">D)</span>
+                                        <span class="option-content">{{ question.option_d|linebreaksbr }}</span>
+                                    </div>
+                                </div>
+                                
+                                {% if question.option_e %}
+                                <div class="option {% if 'E' in question.correct_answers %}option-correct{% else %}option-incorrect{% endif %}">
+                                    <div class="option-indicator">
+                                        {% if 'E' in question.correct_answers %}
+                                            <span class="correct-icon">✓</span>
+                                        {% else %}
+                                            <span class="incorrect-icon">✗</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="option-text">
+                                        <span class="option-letter">E)</span>
+                                        <span class="option-content">{{ question.option_e|linebreaksbr }}</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            
+                            {% elif question.question_type == "MULTI" %}
+                                <div class="option {% if 'A' in question.correct_answers %}option-correct{% else %}option-incorrect{% endif %}">
+                                    <div class="option-indicator">
+                                        {% if 'A' in question.correct_answers %}
+                                            <span class="correct-icon">✓</span>
+                                        {% else %}
+                                            <span class="incorrect-icon">✗</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="option-text">
+                                        <span class="option-letter">A)</span>
+                                        <span class="option-content">{{ question.option_a|linebreaksbr }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="option {% if 'B' in question.correct_answers %}option-correct{% else %}option-incorrect{% endif %}">
+                                    <div class="option-indicator">
+                                        {% if 'B' in question.correct_answers %}
+                                            <span class="correct-icon">✓</span>
+                                        {% else %}
+                                            <span class="incorrect-icon">✗</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="option-text">
+                                        <span class="option-letter">B)</span>
+                                        <span class="option-content">{{ question.option_b|linebreaksbr }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="option {% if 'C' in question.correct_answers %}option-correct{% else %}option-incorrect{% endif %}">
+                                    <div class="option-indicator">
+                                        {% if 'C' in question.correct_answers %}
+                                            <span class="correct-icon">✓</span>
+                                        {% else %}
+                                            <span class="incorrect-icon">✗</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="option-text">
+                                        <span class="option-letter">C)</span>
+                                        <span class="option-content">{{ question.option_c|linebreaksbr }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="option {% if 'D' in question.correct_answers %}option-correct{% else %}option-incorrect{% endif %}">
+                                    <div class="option-indicator">
+                                        {% if 'D' in question.correct_answers %}
+                                            <span class="correct-icon">✓</span>
+                                        {% else %}
+                                            <span class="incorrect-icon">✗</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="option-text">
+                                        <span class="option-letter">D)</span>
+                                        <span class="option-content">{{ question.option_d|linebreaksbr }}</span>
+                                    </div>
+                                </div>
+                                
+                                {% if question.option_e %}
+                                <div class="option {% if 'E' in question.correct_answers %}option-correct{% else %}option-incorrect{% endif %}">
+                                    <div class="option-indicator">
+                                        {% if 'E' in question.correct_answers %}
+                                            <span class="correct-icon">✓</span>
+                                        {% else %}
+                                            <span class="incorrect-icon">✗</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="option-text">
+                                        <span class="option-letter">E)</span>
+                                        <span class="option-content">{{ question.option_e|linebreaksbr }}</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+
+                        {% comment %} Explicación adicional si existe {% endcomment %}
+                        {% if question.explanation %}
+                            <div class="explanation-box">
+                                <h4>💡 Explicación</h4>
+                                <p>{{ question.explanation|linebreaksbr }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <!-- Navegación -->
+                <div class="wizard-nav">
+                    <button type="button" id="prevBtn" class="nav-btn" disabled>← Anterior</button>
+                    <button type="button" id="nextBtn" class="nav-btn primary">Siguiente →</button>
+                    <button type="button" id="finishBtn" class="nav-btn finish hidden">🎯 Finalizar Estudio</button>
+                </div>
+            </div>
+        {% else %}
+            <div class="no-questions">
+                <h3>📚 No hay preguntas disponibles</h3>
+                <p>Aún no se han cargado preguntas para estudiar en el sistema.</p>
+                <p><a href="{% url 'upload_csv' %}" style="color: #667eea;">Cargar preguntas desde CSV</a></p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="{% static 'questions/js/study_exam.js' %}"></script>
+</body>
+</html>
