@@ -8,7 +8,7 @@ class SingleChoiceQuestion(models.Model):
     option_c = models.TextField()
     option_d = models.TextField()
     option_e = models.TextField(blank=True, null=True)
-    answer = models.TextField()  # Respuesta correcta como texto
+    answer1 = models.TextField()  # Respuesta correcta como texto
     has_image = models.BooleanField(default=False)  # ¿Tiene imagen?
     image_filename = models.CharField(max_length=100, blank=True, null=True)  # Nombre del archivo (ej: "1.png", "uid123.png")
 
@@ -35,7 +35,8 @@ class MultipleChoiceQuestion(models.Model):
     option_c = models.TextField()
     option_d = models.TextField()
     option_e = models.TextField(blank=True, null=True)
-    answer = models.TextField()  # Puede ser "A-B" para varias respuestas correctas
+    answer1 = models.TextField()  # Primera respuesta correcta
+    answer2 = models.TextField(blank=True, null=True)  # Segunda respuesta correcta (opcional)
     has_image = models.BooleanField(default=False)  # ¿Tiene imagen?
     image_filename = models.CharField(max_length=100, blank=True, null=True)  # Nombre del archivo
 

@@ -35,7 +35,7 @@ def selection_exam_view(request):
                 'E': question.option_e
             }
             
-            if user_answer and option_mapping.get(user_answer) == question.answer:
+            if user_answer and option_mapping.get(user_answer) == question.answer1:
                 correct_answers += 1
         
         # Verificar las respuestas de las preguntas de selección múltiple
@@ -43,10 +43,12 @@ def selection_exam_view(request):
         for question in multiple_choice_questions:
             total_questions += 1
             user_answers = request.POST.getlist(f"question_{question.id}")
-            correct_answers_list = question.answer.split("-")
             
-            # Mapear las letras a opciones
-            user_options = []
+            # Obtener los textos de las respuestas correctas desde answer1 y answer2
+            correct_options_texts = [q for q in [question.answer1, question.answer2] if q]
+
+            # Mapear las letras seleccionadas por el usuario a sus textos
+            user_options_texts = []
             option_mapping = {
                 'A': question.option_a,
                 'B': question.option_b,
@@ -55,16 +57,12 @@ def selection_exam_view(request):
                 'E': question.option_e
             }
             
-            for answer in user_answers:
-                if answer in option_mapping:
-                    user_options.append(option_mapping[answer])
+            for letter in user_answers:
+                if letter in option_mapping:
+                    user_options_texts.append(option_mapping[letter])
             
-            correct_options = []
-            for answer in correct_answers_list:
-                if answer in option_mapping:
-                    correct_options.append(option_mapping[answer])
-            
-            if sorted(user_options) == sorted(correct_options):
+            # Comparar las listas de textos (sin importar el orden)
+            if sorted(user_options_texts) == sorted(correct_options_texts):
                 correct_answers += 1
         
         # Calcular el puntaje
@@ -210,14 +208,14 @@ def upload_csv_view(request):
                         'option_c': opt['C'],
                         'option_d': opt['D'],
                         'option_e': opt.get('E', ''),
-                        'answer': opt[answer_raw],  # letra -> texto
+                        'answer1': opt[answer_raw],  # letra -> texto
                         'has_image': has_image,
                         'image_filename': image_filename
                     }
                     try:
                         obj = SingleChoiceQuestion.objects.get(np=np_code)
                         action, diff = _diff_model(obj, payload, fields=[
-                            'text','option_a','option_b','option_c','option_d','option_e','answer','has_image','image_filename'
+                            'text','option_a','option_b','option_c','option_d','option_e','answer1','has_image','image_filename'
                         ])
                     except SingleChoiceQuestion.DoesNotExist:
                         obj = None
@@ -225,7 +223,11 @@ def upload_csv_view(request):
 
                 elif qtype == 'MULTI':
                     letters = [x.strip() for x in answer_raw.split('-')]
-                    answer_texts = [opt[l] for l in letters if l in opt]
+                    # Asegurarse de tener al menos dos respuestas, rellenando con None si es necesario
+                    answer_texts = [opt.get(l) for l in letters if l in opt]
+                    while len(answer_texts) < 2:
+                        answer_texts.append(None)
+
                     payload = {
                         'np': np_code,
                         'text': row['Question'],
@@ -234,14 +236,15 @@ def upload_csv_view(request):
                         'option_c': opt['C'],
                         'option_d': opt['D'],
                         'option_e': opt.get('E', ''),
-                        'answer': '-'.join(answer_texts),
+                        'answer1': answer_texts[0],
+                        'answer2': answer_texts[1],
                         'has_image': has_image,
                         'image_filename': image_filename
                     }
                     try:
                         obj = MultipleChoiceQuestion.objects.get(np=np_code)
                         action, diff = _diff_model(obj, payload, fields=[
-                            'text','option_a','option_b','option_c','option_d','option_e','answer','has_image','image_filename'
+                            'text','option_a','option_b','option_c','option_d','option_e','answer1', 'answer2','has_image','image_filename'
                         ])
                     except MultipleChoiceQuestion.DoesNotExist:
                         obj = None
@@ -432,7 +435,7 @@ def study_mode(request):
             
             # Encontrar la letra de la respuesta correcta
             for letter, option_text in option_mapping.items():
-                if option_text == question.answer:
+                if option_text == question.answer1:
                     correct_answers.append(letter)
                     break
             
@@ -453,8 +456,8 @@ def study_mode(request):
         
         # Procesar preguntas de selección múltiple
         for question in multiple_choice_questions:
-            # Las respuestas correctas están separadas por "-"
-            correct_answer_texts = question.answer.split("-")
+            # Obtener los textos de las respuestas correctas
+            correct_answer_texts = [ans for ans in [question.answer1, question.answer2] if ans]
             correct_answers = []
             
             option_mapping = {
@@ -588,12 +591,12 @@ def check_answer_api(request):
                 'E': q.option_e
             }
             # Verdadero si el texto de la letra elegida coincide con la respuesta guardada
-            is_correct = (option_mapping.get(user_letter) == q.answer)
+            is_correct = (option_mapping.get(user_letter) == q.answer1)
 
             # Hallar la(s) letra(s) correcta(s) (en SINGLE será 1 letra)
             correct_letters = []
             for letter, text in option_mapping.items():
-                if text == q.answer:
+                if text == q.answer1:
                     correct_letters.append(letter)
                     break
 
@@ -624,16 +627,16 @@ def check_answer_api(request):
                 'E': q.option_e
             }
 
-            # En tu almacenamiento, MultipleChoiceQuestion.answer es textos unidos por "-"
-            correct_texts = [t.strip() for t in q.answer.split('-') if t.strip()]
-            # Mapear letras correctas comparando textos
+            # Obtener los textos de las respuestas correctas
+            correct_texts = [ans for ans in [q.answer1, q.answer2] if ans]
+            
+            # Mapear los textos correctos a sus letras correspondientes
             correct_letters = []
             for letter, text in option_mapping.items():
                 if text and text in correct_texts:
                     correct_letters.append(letter)
-            correct_letters = sorted(correct_letters)
 
-            is_correct = (sorted(user_letters) == correct_letters)
+            is_correct = (sorted(user_letters) == sorted(correct_letters))
 
             return JsonResponse({
                 'correct': is_correct,

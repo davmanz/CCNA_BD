@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import SingleChoiceQuestion, MultipleChoiceQuestion, DragAndDropQuestion
 
 class SingleChoiceQuestionAdmin(admin.ModelAdmin):
-    list_display = ('text_preview', 'answer', 'has_image', 'image_filename')
+    list_display = ('text_preview', 'answer1', 'has_image', 'image_filename')
     list_filter = ('has_image',)
     search_fields = ('text', 'image_filename')
     
@@ -11,7 +11,7 @@ class SingleChoiceQuestionAdmin(admin.ModelAdmin):
     text_preview.short_description = 'Pregunta'
 
 class MultipleChoiceQuestionAdmin(admin.ModelAdmin):
-    list_display = ('text_preview', 'answer', 'has_image', 'image_filename')
+    list_display = ('text_preview', 'answer1', 'answer2', 'has_image', 'image_filename')
     list_filter = ('has_image',)
     search_fields = ('text', 'image_filename')
     
